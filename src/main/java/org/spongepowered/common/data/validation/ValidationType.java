@@ -22,13 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.nbt;
+package org.spongepowered.common.data.validation;
 
-import org.spongepowered.api.util.generator.dummy.DummyObjectProvider;
+import org.spongepowered.api.CatalogType;
+import org.spongepowered.api.util.annotation.CatalogedBy;
 
-public class NbtDataTypes {
-
-    public static final NbtDataType ENTITY = DummyObjectProvider.createFor(NbtDataType.class, "ENTITY");
-    public static final NbtDataType TILE_ENTITY = DummyObjectProvider.createFor(NbtDataType.class, "TILE_ENTITY");
+@CatalogedBy(Validations.class)
+public interface ValidationType extends CatalogType {
 
 }

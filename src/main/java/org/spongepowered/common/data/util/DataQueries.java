@@ -169,4 +169,15 @@ public final class DataQueries {
 
     private DataQueries() {
     }
+
+    public static final class TileEntityArchetype {
+
+        public static final DataQuery TILE_TYPE = of("TileEntityType");
+        public static final DataQuery BLOCK_STATE = of("BlockState");
+        public static final DataQuery TILE_DATA = of("TileEntityData");
+
+        private TileEntityArchetype() {
+        }
+
+    }
 }

@@ -27,11 +27,13 @@ package org.spongepowered.common.block;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.MapDifference;
 import com.google.common.collect.Maps;
+import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.trait.BlockTrait;
 
 import java.util.Comparator;
@@ -74,6 +76,21 @@ public final class BlockUtil {
             // implementing classes.
             throw new UnsupportedOperationException("Custom BlockState implementations are not supported");
         }
+    }
+
+    public static BlockState fromNative(IBlockState state) {
+        if (state instanceof BlockState) {
+            return (BlockState) state;
+        }
+        throw new IllegalArgumentException("Native block state implementation not compatible with this implementation!");
+    }
+
+    public static BlockType toBlock(IBlockState state) {
+        return fromNative(state).getType();
+    }
+
+    public static Block toBlock(BlockState state) {
+        return toNative(state).getBlock();
     }
 
     private BlockUtil() {

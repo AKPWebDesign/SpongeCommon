@@ -260,6 +260,7 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(TradeOfferGenerator.Builder.class, SpongeTradeOfferGenerator.Builder::new)
             .registerBuilderSupplier(ItemStackGenerator.Builder.class, SpongeItemStackGenerator.Builder::new)
             .registerBuilderSupplier(WeatherSpawnCause.Builder.class, SpongeWeatherSpawnCauseBuilder::new)
+            .registerBuilderSupplier(TileEntityArchetype.Builder.class, SpongeTileEntityArchetypeBuilder::new)
         ;
     }
 
@@ -293,7 +294,7 @@ public final class CommonModuleRegistry {
             .registerModule(DimensionType.class, DimensionTypeRegistryModule.getInstance())
             .registerModule(DirtType.class, new DirtTypeRegistryModule())
             .registerModule(DisguisedBlockType.class, new DisguisedBlockTypeRegistryModule())
-            .registerModule(DisplaySlot.class,DisplaySlotRegistryModule.getInstance())
+            .registerModule(DisplaySlot.class, DisplaySlotRegistryModule.getInstance())
             .registerModule(DoublePlantType.class, new DoublePlantTypeRegistryModule())
             .registerModule(DyeColor.class, DyeColorRegistryModule.getInstance())
             .registerModule(Enchantment.class, EnchantmentRegistryModule.getInstance())
