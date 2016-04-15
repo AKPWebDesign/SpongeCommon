@@ -22,22 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.validation;
+package org.spongepowered.common.data.nbt.validation;
 
-import org.spongepowered.api.data.DataView;
+public class Validations {
 
-public interface RawDataValidator {
+    public static final ValidationType ENTITY = new SpongeValidationType("sponge:entity", "Entity");
+    public static final ValidationType TILE_ENTITY = new SpongeValidationType("sponge:block_entity", "BlockEntity");
 
-    ValidationType getValidationType();
-
-    /**
-     * Validates the DataView sufficiently passes the basic requirements
-     * for the designated {@link ValidationType}. If the validation
-     * succeeded, {@code true} is returned.
-     *
-     * @param view The view to validate
-     * @return True if the view contains valid data
-     */
-    boolean validate(DataView view);
 
 }

@@ -22,28 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.nbt;
+package org.spongepowered.common.data.nbt.validation;
 
 import net.minecraft.nbt.NBTTagCompound;
-import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 
-import java.util.Optional;
+public class SpongeEntityValidator implements RawDataValidator {
 
-public interface NbtDataProcessor<M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> {
+    @Override
+    public ValidationType getValidationType() {
+        return Validations.ENTITY;
+    }
 
-    int getPriority();
-
-    NbtDataType getTargetType();
-
-    boolean isCompatible(NbtDataType nbtDataType);
-
-    Optional<M> readFromCompound(NBTTagCompound compound);
-
-    Optional<M> readFromView(DataView view);
-
-    Optional<NBTTagCompound> storeToCompound(NBTTagCompound compound, M manipulator);
-
-    Optional<DataView> storeToView(DataView view, M manipulator);
+    @Override
+    public boolean validate(NBTTagCompound view) {
+        // TODO implement this bit, the view needs various things, but it most definteily cannot
+        // contain
+        return true;
+    }
 }

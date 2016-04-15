@@ -22,25 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.validation;
+package org.spongepowered.common.data.nbt;
 
-public class SpongeValidationType implements ValidationType {
+import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 
-    private final String id;
-    private final String name;
+public abstract class AbstractSpongeNbtProcessor<T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> implements NbtDataProcessor<T, I> {
 
-    public SpongeValidationType(String id, String name) {
-        this.id = id;
-        this.name = name;
+    private final NbtDataType dataType;
+
+    protected AbstractSpongeNbtProcessor(NbtDataType dataType) {
+        this.dataType = dataType;
     }
 
     @Override
-    public String getId() {
-        return this.id;
+    public int getPriority() {
+        return 100;
     }
 
     @Override
-    public String getName() {
-        return this.name;
+    public final NbtDataType getTargetType() {
+        return this.dataType;
     }
 }

@@ -25,7 +25,6 @@
 package org.spongepowered.common.block;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
@@ -44,8 +43,8 @@ import org.spongepowered.common.data.nbt.NbtDataTypes;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataVersions;
-import org.spongepowered.common.data.validation.ValidationType;
-import org.spongepowered.common.data.validation.Validations;
+import org.spongepowered.common.data.nbt.validation.ValidationType;
+import org.spongepowered.common.data.nbt.validation.Validations;
 import org.spongepowered.common.util.VecHelper;
 
 public class SpongeTileEntityArchetype extends AbstractArchetype<TileEntityType, BlockSnapshot> implements TileEntityArchetype {
@@ -53,7 +52,7 @@ public class SpongeTileEntityArchetype extends AbstractArchetype<TileEntityType,
     final BlockState blockState;
 
     SpongeTileEntityArchetype(SpongeTileEntityArchetypeBuilder builder) {
-        super(builder.tileEntityType, builder.tileData);
+        super(builder.tileEntityType, NbtTranslator.getInstance().translateData(builder.tileData));
         this.blockState = builder.blockState;
     }
 
@@ -69,7 +68,7 @@ public class SpongeTileEntityArchetype extends AbstractArchetype<TileEntityType,
 
     @Override
     public DataContainer getTileData() {
-        return this.data.copy();
+        return NbtTranslator.getInstance().translateFrom(this.data);
     }
 
     @Override
@@ -77,32 +76,33 @@ public class SpongeTileEntityArchetype extends AbstractArchetype<TileEntityType,
         final BlockState currentState = location.getBlock();
         final Block currentBlock = BlockUtil.toBlock(currentState);
         final Block newBlock = BlockUtil.toBlock(this.blockState);
-        final IBlockState newState = BlockUtil.toNative(this.blockState);
         final net.minecraft.world.World minecraftWorld = (net.minecraft.world.World) location.getExtent();
 
+        BlockPos blockpos = VecHelper.toBlockPos(location);
         if (currentBlock != newBlock) {
-            BlockPos blockpos = VecHelper.toBlockPos(location);
-
-            final NBTTagCompound compound = NbtTranslator.getInstance().translateData(this.data);
-
-
-            if (minecraftWorld.setBlockState(blockpos, newState, 2)) {
-                TileEntity tileEntity = minecraftWorld.getTileEntity(blockpos);
-                if (tileEntity == null) {
-                    throw new IllegalStateException("Could not create a tile entity for this archetype, possibly there's some issues with deserialization?");
-                }
-                compound.setInteger("x", blockpos.getX());
-                compound.setInteger("y", blockpos.getY());
-                compound.setInteger("z", blockpos.getZ());
-                tileEntity.readFromNBT(compound);
-            }
+            ((World) minecraftWorld).setBlock(blockpos.getX(), blockpos.getY(), blockpos.getZ(), this.blockState, true, cause);
         }
+        final NBTTagCompound compound = (NBTTagCompound) this.data.copy();
+
+        TileEntity tileEntity = minecraftWorld.getTileEntity(blockpos);
+        if (tileEntity == null) {
+            throw new IllegalStateException("Could not create a tile entity for this archetype, possibly there's some issues with deserialization?");
+        }
+        compound.setInteger("x", blockpos.getX());
+        compound.setInteger("y", blockpos.getY());
+        compound.setInteger("z", blockpos.getZ());
+        tileEntity.readFromNBT(compound);
 
     }
 
     @Override
     public BlockSnapshot toSnapshot(Location<World> location) {
-        return null;
+        final SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
+        builder.blockState = this.blockState;
+        builder.compound = (NBTTagCompound) this.data.copy();
+        builder.worldUuid = location.getExtent().getUniqueId();
+        builder.coords = location.getBlockPosition();
+        return builder.build();
     }
 
     @Override
@@ -127,5 +127,14 @@ public class SpongeTileEntityArchetype extends AbstractArchetype<TileEntityType,
     @Override
     protected ValidationType getValidationType() {
         return Validations.TILE_ENTITY;
+    }
+
+    @Override
+    public TileEntityArchetype copy() {
+        final SpongeTileEntityArchetypeBuilder builder = new SpongeTileEntityArchetypeBuilder();
+        builder.tileEntityType = this.type;
+        builder.tileData = NbtTranslator.getInstance().translate(this.data);
+        builder.blockState = this.blockState;
+        return builder.build();
     }
 }

@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.validation;
+package org.spongepowered.common.data.nbt.validation;
 
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.util.annotation.CatalogedBy;

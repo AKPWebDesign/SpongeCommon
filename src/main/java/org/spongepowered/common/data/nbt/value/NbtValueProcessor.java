@@ -22,21 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.validation;
+package org.spongepowered.common.data.nbt.value;
 
-import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.DataTransactionResult;
+import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.common.data.AbstractArchetype;
 
-public class SpongeEntityValidator implements RawDataValidator {
+public interface NbtValueProcessor<E, V extends BaseValue<E>> {
 
-    @Override
-    public ValidationType getValidationType() {
-        return Validations.ENTITY;
-    }
+    DataTransactionResult offer(AbstractArchetype csAbstractArchetype, E value);
 
-    @Override
-    public boolean validate(DataView view) {
-        // TODO implement this bit, the view needs various things, but it most definteily cannot
-        // contain
-        return true;
-    }
 }

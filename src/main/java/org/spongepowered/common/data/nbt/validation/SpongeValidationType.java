@@ -22,12 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.validation;
+package org.spongepowered.common.data.nbt.validation;
 
-public class Validations {
+public class SpongeValidationType implements ValidationType {
 
-    public static final ValidationType ENTITY = new SpongeValidationType("sponge:entity", "Entity");
-    public static final ValidationType TILE_ENTITY = new SpongeValidationType("sponge:block_entity", "BlockEntity");
+    private final String id;
+    private final String name;
 
+    public SpongeValidationType(String id, String name) {
+        this.id = id;
+        this.name = name;
+    }
 
+    @Override
+    public String getId() {
+        return this.id;
+    }
+
+    @Override
+    public String getName() {
+        return this.name;
+    }
 }
