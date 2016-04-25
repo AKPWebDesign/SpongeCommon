@@ -27,23 +27,31 @@ package org.spongepowered.common.data.nbt;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagByte;
 import net.minecraft.nbt.NBTTagCompound;
+import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFlyingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.FlyingData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFlyingData;
+import org.spongepowered.common.data.nbt.data.NbtDataProcessor;
 import org.spongepowered.common.data.util.NbtDataUtil;
 
 import java.util.Optional;
 
-public class IsFlyingNbtProcessor extends AbstractSpongeNbtProcessor<FlyingData, ImmutableFlyingData> implements NbtDataProcessor<FlyingData, ImmutableFlyingData> {
+public class IsFlyingNbtProcessor extends AbstractSpongeNbtProcessor<FlyingData, ImmutableFlyingData> implements
+        NbtDataProcessor<FlyingData, ImmutableFlyingData> {
 
     public IsFlyingNbtProcessor() {
         super(NbtDataTypes.ENTITY);
     }
 
     @Override
-    public Optional<FlyingData> readFromCompound(NBTTagCompound compound) {
+    public boolean isCompatible(NBTTagCompound nbtDataType) {
+        return false;
+    }
+
+    @Override
+    public Optional<FlyingData> readFrom(NBTTagCompound compound) {
         final NBTBase tag = compound.getTag(NbtDataUtil.Minecraft.IS_FLYING);
         if (tag != null) {
             return Optional.of(new SpongeFlyingData(((NBTTagByte) tag).getByte() != 0));
@@ -52,7 +60,7 @@ public class IsFlyingNbtProcessor extends AbstractSpongeNbtProcessor<FlyingData,
     }
 
     @Override
-    public Optional<FlyingData> readFromView(DataView view) {
+    public Optional<FlyingData> readFrom(DataView view) {
         return view.getBoolean(Keys.IS_FLYING.getQuery()).map(SpongeFlyingData::new);
     }
 
@@ -66,5 +74,15 @@ public class IsFlyingNbtProcessor extends AbstractSpongeNbtProcessor<FlyingData,
     public Optional<DataView> storeToView(DataView view, FlyingData manipulator) {
         view.set(Keys.IS_FLYING, manipulator.flying().get());
         return Optional.of(view);
+    }
+
+    @Override
+    public DataTransactionResult remove(NBTTagCompound data) {
+        return null;
+    }
+
+    @Override
+    public DataTransactionResult remove(DataView data) {
+        return null;
     }
 }

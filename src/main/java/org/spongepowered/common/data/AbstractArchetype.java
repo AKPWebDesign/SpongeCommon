@@ -38,10 +38,10 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.api.data.property.PropertyStore;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.common.data.nbt.NbtDataProcessor;
+import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.common.data.nbt.CustomDataNbtUtil;
 import org.spongepowered.common.data.nbt.NbtDataType;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.nbt.validation.ValidationType;
@@ -50,6 +50,7 @@ import org.spongepowered.common.data.property.SpongePropertyRegistry;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public abstract class AbstractArchetype<C extends CatalogType, S extends LocateableSnapshot<S>> implements Archetype<S> {
 
@@ -67,7 +68,7 @@ public abstract class AbstractArchetype<C extends CatalogType, S extends Locatea
 
     @Override
     public boolean validateRawData(DataView container) {
-        return false;
+        return SpongeDataManager.getInstance().getValidators(this.getValidationType()).validate(container);
     }
 
     @Override
@@ -80,11 +81,8 @@ public abstract class AbstractArchetype<C extends CatalogType, S extends Locatea
 
     @Override
     public <T extends Property<?, ?>> Optional<T> getProperty(Class<T> propertyClass) {
-        final Optional<PropertyStore<T>> optional = SpongePropertyRegistry.getInstance().getStore(propertyClass);
-        if (optional.isPresent()) {
-            return optional.get().getFor(this);
-        }
-        return Optional.empty();
+        return SpongePropertyRegistry.getInstance().getStore(propertyClass)
+                .flatMap(store -> store.getFor(this));
     }
 
     @Override
@@ -96,14 +94,14 @@ public abstract class AbstractArchetype<C extends CatalogType, S extends Locatea
     @Override
     public <T extends DataManipulator<?, ?>> Optional<T> get(Class<T> containerClass) {
         return SpongeDataManager.getInstance().getRawNbtProcessor(this.getDataType(), containerClass)
-                .flatMap(processor -> processor.readFromCompound(this.data));
+                .flatMap(processor -> processor.readFrom(this.data));
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public <T extends DataManipulator<?, ?>> Optional<T> getOrCreate(Class<T> containerClass) {
         return SpongeDataManager.getInstance().getRawNbtProcessor(this.getDataType(), containerClass)
-                .flatMap(processor -> processor.readFromCompound(this.data));
+                .flatMap(processor -> processor.readFrom(this.data));
     }
 
     @Override
@@ -111,28 +109,28 @@ public abstract class AbstractArchetype<C extends CatalogType, S extends Locatea
         // By default, if there is a processor, we can check compatibilty with that
         // Otherwise, it's true because of custom data.
         return SpongeDataManager.getInstance().getRawNbtProcessor(this.getDataType(), holderClass)
-                .map(processor -> processor.isCompatible(this.getDataType()))
+                .map(processor -> processor.isCompatible(this.data))
                 .orElse(true);
     }
 
     @Override
     public <E> DataTransactionResult offer(Key<? extends BaseValue<E>> key, E value) {
         return SpongeDataManager.getInstance().getNbtProcessor(this.getDataType(), key)
-                .map(processor -> processor.offer(this, value))
-                .orElse(DataTransactionResult.failNoData());
+                .map(processor -> processor.offer(this.data, value))
+                .orElseGet(DataTransactionResult::failNoData);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public DataTransactionResult offer(DataManipulator<?, ?> valueContainer, MergeFunction function) {
         return SpongeDataManager.getInstance().getRawNbtProcessor(this.getDataType(), valueContainer.getClass())
                 .map(processor -> {
-                    Optional<DataManipulator<?, ?>> manipulator = processor.readFromCompound(this.data);
-                    DataManipulator<?, ?> newManipulator;
-                    if (manipulator.isPresent()) {
-                        newManipulator = function.merge(manipulator.get(), valueContainer);
-                    } else {
-                        newManipulator = valueContainer;
-                    }
+                    Optional<DataManipulator<?, ?>> optionalManipulator = processor.readFrom(this.data);
+
+                    final DataManipulator<?, ?> newManipulator = optionalManipulator
+                            .map(manipulator -> (DataManipulator) function.merge(manipulator, valueContainer))
+                            .orElse(valueContainer);
+
                     final Optional<NBTTagCompound> optional = processor.storeToCompound(this.data, newManipulator);
                     if (optional.isPresent()) {
                         this.data = optional.get();
@@ -140,56 +138,93 @@ public abstract class AbstractArchetype<C extends CatalogType, S extends Locatea
                     return DataTransactionResult.failNoData();
 
                 })
-                .orElse(DataTransactionResult.failNoData());
+                .orElseGet(() -> CustomDataNbtUtil.apply(this.data, valueContainer));
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public DataTransactionResult remove(Class<? extends DataManipulator<?, ?>> containerClass) {
-        return null;
+        return SpongeDataManager.getInstance().getRawNbtProcessor(this.getDataType(), containerClass)
+                .map(processor -> processor.remove(this.data))
+                .orElseGet(() -> CustomDataNbtUtil.remove(this.data, containerClass));
     }
 
     @Override
     public DataTransactionResult remove(Key<?> key) {
-        return null;
+        return SpongeDataManager.getInstance().getRawNbtProcessor(this.getDataType(), key)
+                .map(processor -> processor.remove(this.data))
+                .orElseGet(DataTransactionResult::failNoData);
     }
 
     @Override
     public DataTransactionResult undo(DataTransactionResult result) {
-        return null;
+        if (result.getReplacedData().isEmpty() && result.getSuccessfulData().isEmpty()) {
+            return DataTransactionResult.successNoData();
+        }
+        final DataTransactionResult.Builder builder = DataTransactionResult.builder();
+        for (ImmutableValue<?> replaced : result.getReplacedData()) {
+            builder.absorbResult(offer(replaced));
+        }
+        for (ImmutableValue<?> successful : result.getSuccessfulData()) {
+            builder.absorbResult(remove(successful));
+        }
+        return builder.build();
     }
 
     @Override
     public DataTransactionResult copyFrom(DataHolder that, MergeFunction function) {
-        return null;
+        return DataTransactionResult.failNoData();
     }
 
     @Override
     public Collection<DataManipulator<?, ?>> getContainers() {
-        return null;
+        return SpongeDataManager.getInstance().getNbtProcessors(this.getDataType()).stream()
+                .map(processor -> processor.readFrom(this.data))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <E> Optional<E> get(Key<? extends BaseValue<E>> key) {
-        return null;
+        return SpongeDataManager.getInstance().getNbtProcessor(this.getDataType(), key)
+                .flatMap(processor -> processor.readValue(this.data));
     }
 
     @Override
     public <E, V extends BaseValue<E>> Optional<V> getValue(Key<V> key) {
-        return null;
+        return SpongeDataManager.getInstance().getNbtProcessor(this.getDataType(), key)
+                .flatMap(processor -> processor.readFrom(this.data));
     }
 
     @Override
     public boolean supports(Key<?> key) {
-        return false;
+        return SpongeDataManager.getInstance().getRawNbtProcessor(this.getDataType(), key)
+                .map(processor -> processor.isCompatible(this.getDataType()))
+                .orElse(true); // we want to say we automatically support custom data
     }
 
     @Override
     public Set<Key<?>> getKeys() {
-        return null;
+        return SpongeDataManager.getInstance().getNbtValueProcessors(this.getDataType()).stream()
+                .map(processor -> processor.readFrom(this.data))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .map(BaseValue::getKey)
+                .collect(Collectors.toSet());
     }
 
     @Override
     public Set<ImmutableValue<?>> getValues() {
-        return null;
+        return SpongeDataManager.getInstance().getNbtValueProcessors(this.getDataType()).stream()
+                .map(processor -> processor.readFrom(this.data))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .filter(value -> value instanceof Value<?>)
+                .map(value -> (Value<?>) value)
+                .map(Value::asImmutable)
+                .collect(Collectors.toSet());
+
     }
 }

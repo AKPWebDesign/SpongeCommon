@@ -25,6 +25,7 @@
 package org.spongepowered.common.data.nbt.validation;
 
 import net.minecraft.nbt.NBTTagCompound;
+import org.spongepowered.api.data.DataView;
 
 public class SpongeEntityValidator implements RawDataValidator {
 
@@ -38,5 +39,10 @@ public class SpongeEntityValidator implements RawDataValidator {
         // TODO implement this bit, the view needs various things, but it most definteily cannot
         // contain
         return true;
+    }
+
+    @Override
+    public boolean validate(DataView view) {
+        return false;
     }
 }

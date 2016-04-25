@@ -26,6 +26,7 @@ package org.spongepowered.common.data.nbt;
 
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+import org.spongepowered.common.data.nbt.data.NbtDataProcessor;
 
 public abstract class AbstractSpongeNbtProcessor<T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> implements NbtDataProcessor<T, I> {
 

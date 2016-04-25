@@ -26,9 +26,11 @@ package org.spongepowered.common.data.nbt;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.nbt.NBTTagCompound;
+import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+import org.spongepowered.common.data.nbt.data.NbtDataProcessor;
 
 import java.util.Optional;
 
@@ -53,9 +55,19 @@ public class SpongeNbtProcessorDelegate<M extends DataManipulator<M, I>, I exten
     }
 
     @Override
-    public Optional<M> readFromCompound(NBTTagCompound compound) {
+    public boolean isCompatible(NBTTagCompound compound) {
         for (NbtDataProcessor<M, I> processor : this.processors) {
-            final Optional<M> returnVal = processor.readFromCompound(compound);
+            if (processor.isCompatible(compound)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public Optional<M> readFrom(NBTTagCompound compound) {
+        for (NbtDataProcessor<M, I> processor : this.processors) {
+            final Optional<M> returnVal = processor.readFrom(compound);
             if (returnVal.isPresent()) {
                 return returnVal;
             }
@@ -64,9 +76,9 @@ public class SpongeNbtProcessorDelegate<M extends DataManipulator<M, I>, I exten
     }
 
     @Override
-    public Optional<M> readFromView(DataView view) {
+    public Optional<M> readFrom(DataView view) {
         for (NbtDataProcessor<M, I> processor : this.processors) {
-            final Optional<M> returnVal = processor.readFromView(view);
+            final Optional<M> returnVal = processor.readFrom(view);
             if (returnVal.isPresent()) {
                 return returnVal;
             }
@@ -93,5 +105,16 @@ public class SpongeNbtProcessorDelegate<M extends DataManipulator<M, I>, I exten
                 return returnVal;
             }
         }
-        return Optional.empty();    }
+        return Optional.empty();
+    }
+
+    @Override
+    public DataTransactionResult remove(NBTTagCompound data) {
+        return DataTransactionResult.failNoData();
+    }
+
+    @Override
+    public DataTransactionResult remove(DataView data) {
+        return DataTransactionResult.failNoData();
+    }
 }

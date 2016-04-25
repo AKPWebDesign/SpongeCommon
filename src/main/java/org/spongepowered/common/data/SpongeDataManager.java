@@ -55,7 +55,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.DataSerializableTypeSerializer;
 import org.spongepowered.common.data.builder.manipulator.SpongeDataManipulatorBuilder;
 import org.spongepowered.common.data.builder.manipulator.SpongeImmutableDataManipulatorBuilder;
-import org.spongepowered.common.data.nbt.NbtDataProcessor;
+import org.spongepowered.common.data.nbt.data.NbtDataProcessor;
 import org.spongepowered.common.data.nbt.NbtDataType;
 import org.spongepowered.common.data.nbt.SpongeNbtProcessorDelegate;
 import org.spongepowered.common.data.nbt.validation.DelegateDataValidator;
@@ -529,5 +529,13 @@ public final class SpongeDataManager implements DataManager {
 
     public Optional<NbtValueProcessor> getRawNbtProcessor(NbtDataType dataType, Key<?> key) {
         return Optional.ofNullable(this.nbtValueTable.get(key, dataType));
+    }
+
+    public Collection<NbtDataProcessor<?, ?>> getNbtProcessors(NbtDataType type) {
+        return this.nbtProcessorTable.column(type).values();
+    }
+
+    public Collection<NbtValueProcessor<?, ?>> getNbtValueProcessors(NbtDataType type) {
+        return this.nbtValueTable.column(type).values();
     }
 }
