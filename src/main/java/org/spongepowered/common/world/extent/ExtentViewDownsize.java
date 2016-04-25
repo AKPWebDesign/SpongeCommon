@@ -52,13 +52,24 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.util.Direction;
+import org.spongepowered.api.util.DiscreteTransform2;
 import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.util.Functional;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.biome.BiomeType;
+import org.spongepowered.api.world.extent.ArchetypeVolume;
 import org.spongepowered.api.world.extent.Extent;
+import org.spongepowered.api.world.extent.ImmutableBiomeArea;
+import org.spongepowered.api.world.extent.ImmutableBlockVolume;
+import org.spongepowered.api.world.extent.MutableBiomeArea;
+import org.spongepowered.api.world.extent.MutableBlockVolume;
+import org.spongepowered.api.world.extent.StorageType;
+import org.spongepowered.api.world.extent.UnmodifiableBiomeArea;
+import org.spongepowered.api.world.extent.UnmodifiableBlockVolume;
+import org.spongepowered.api.world.extent.worker.MutableBiomeAreaWorker;
+import org.spongepowered.api.world.extent.worker.MutableBlockVolumeWorker;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.Collection;
@@ -547,6 +558,84 @@ public class ExtentViewDownsize implements DefaultedExtent {
     public int getBlockDigTimeWith(int x, int y, int z, ItemStack itemStack, Cause cause) {
         checkRange(x, y, z);
         return this.extent.getBlockDigTimeWith(x, y, z, itemStack, cause);
+    }
+
+    @Override
+    public MutableBiomeAreaWorker<? extends Extent> getBiomeWorker() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public MutableBlockVolumeWorker<? extends Extent> getBlockWorker() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public ArchetypeVolume createArchetypeVolume(Vector3i min, Vector3i max) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public MutableBlockVolume getBlockView(Vector3i newMin, Vector3i newMax) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public MutableBlockVolume getBlockView(DiscreteTransform3 transform) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public UnmodifiableBlockVolume getUnmodifiableBlockView() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public MutableBlockVolume getBlockCopy(StorageType type) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public ImmutableBlockVolume getImmutableBlockCopy() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public MutableBiomeArea getBiomeView(Vector2i newMin, Vector2i newMax) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public MutableBiomeArea getBiomeView(DiscreteTransform2 transform) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public UnmodifiableBiomeArea getUnmodifiableBiomeView() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public MutableBiomeArea getBiomeCopy(StorageType type) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public ImmutableBiomeArea getImmutableBiomeCopy() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }
