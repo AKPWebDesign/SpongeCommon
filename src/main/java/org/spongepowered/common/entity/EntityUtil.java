@@ -49,6 +49,7 @@ import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.type.Profession;
 import org.spongepowered.api.entity.Transform;
+import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.common.SpongeImpl;
@@ -323,6 +324,10 @@ public final class EntityUtil {
             throw new IllegalArgumentException("Not a native SpongeAPI entity!");
         }
         return (org.spongepowered.api.entity.Entity) mixinEntity;
+    }
+
+    public static EntitySnapshot createSnapshot(Entity entity) {
+        return fromNative(entity).createSnapshot();
     }
 
     public static boolean changeWorld(Entity entity, Transform<org.spongepowered.api.world.World> toTransform) {
