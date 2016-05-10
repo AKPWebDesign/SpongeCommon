@@ -62,7 +62,6 @@ import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.type.block.TileEntityTypeRegistryModule;
-import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.Collection;
@@ -98,7 +97,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
             world.getCauseTracker().getStack().peek().getContext().firstNamed(NamedCause.SOURCE, TileEntity.class).ifPresent(currentTick -> {
                 if (currentTick != this) {
                     net.minecraft.tileentity.TileEntity te = (net.minecraft.tileentity.TileEntity) currentTick;
-                    SpongeHooks.tryToTrackBlock(te.getWorld(), te, te.getPos(), this.getBlockType(), this.pos, PlayerTracker.Type.NOTIFIER);
+//                    world.getCauseTracker().trackTargetBlockFromSource(te, te.getPos(), this.getBlockType(), this.pos, PlayerTracker.Type.NOTIFIER);
                 }
             });
         }

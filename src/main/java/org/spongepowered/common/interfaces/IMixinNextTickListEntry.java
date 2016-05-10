@@ -22,19 +22,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.util;
+package org.spongepowered.common.interfaces;
 
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.world.World;
+import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.block.tileentity.TileEntity;
+import org.spongepowered.api.entity.living.player.User;
 
+import java.util.Optional;
 
-public class StaticMixinHelper {
+import javax.annotation.Nullable;
 
-    public static boolean processingInternalForgeEvent = false;
-    public static boolean convertingMapFormat = false;
+public interface IMixinNextTickListEntry {
 
-    // For animation packet
-    public static int lastAnimationPacketTick = 0;
-    public static int lastSecondaryPacketTick = 0;
-    public static int lastPrimaryPacketTick = 0;
-    public static EntityPlayerMP lastAnimationPlayer = null;
+    void setWorld(World world);
+
+    boolean hasSourceUser();
+
+    boolean hasTickingBlock();
+
+    boolean hasTickingTileEntity();
+
+    Optional<BlockSnapshot> getCurrentTickBlock();
+
+    Optional<TileEntity> getCurrentTickTileEntity();
+
+    Optional<User> getSourceUser();
+
+    void setCurrentTickBlock(@Nullable BlockSnapshot tickBlock);
+
+    void setCurrentTickTileEntity(@Nullable TileEntity tickTileEntity);
+
+    void setSourceUser(User user);
 }

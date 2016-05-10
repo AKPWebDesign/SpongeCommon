@@ -39,6 +39,8 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
@@ -73,6 +75,27 @@ public final class EntityUtil {
     public static final BlockPos HANGING_OFFSET_SOUTH = new BlockPos(0, 1, 1);
 
     private EntityUtil() {
+    }
+
+    public static RayTraceResult rayTraceFromEntity(Entity entity, double traceDistance, float partialTicks)
+    {
+        Vec3d var4 = EntityUtil.getPositionEyes(entity, partialTicks);
+        Vec3d var5 = entity.getLook(partialTicks);
+        Vec3d var6 = var4.addVector(var5.xCoord * traceDistance, var5.yCoord * traceDistance, var5.zCoord * traceDistance);
+        return entity.worldObj.rayTraceBlocks(var4, var6, false, false, true);
+    }
+
+    public static Vec3d getPositionEyes(Entity entity, float partialTicks)
+    {
+        if (partialTicks == 1.0F)
+        {
+            return new Vec3d(entity.posX, entity.posY + entity.getEyeHeight(), entity.posZ);
+        }
+
+        double interpX = entity.prevPosX + (entity.posX - entity.prevPosX) * partialTicks;
+        double interpY = entity.prevPosY + (entity.posY - entity.prevPosY) * partialTicks + entity.getEyeHeight();
+        double interpZ = entity.prevPosZ + (entity.posZ - entity.prevPosZ) * partialTicks;
+        return new Vec3d(interpX, interpY, interpZ);
     }
 
     @SuppressWarnings("unchecked")

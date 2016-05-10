@@ -25,16 +25,15 @@
 package org.spongepowered.common.event.tracking.phase;
 
 import com.flowpowered.math.vector.Vector3d;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.block.Block;
+import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.Humanoid;
 import org.spongepowered.api.entity.living.Living;
@@ -46,12 +45,12 @@ import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.spawn.BlockSpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.api.event.entity.DisplaceEntityEvent;
-import org.spongepowered.api.util.GuavaCollectors;
 import org.spongepowered.api.util.Identifiable;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
@@ -65,6 +64,7 @@ import org.spongepowered.common.event.tracking.phase.function.EntityListConsumer
 import org.spongepowered.common.event.tracking.phase.function.GeneralFunctions;
 import org.spongepowered.common.event.tracking.phase.util.PhaseUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.util.VecHelper;
@@ -75,7 +75,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
@@ -370,6 +369,16 @@ public final class WorldPhase extends TrackingPhase {
                         .orElseThrow(PhaseUtil.throwWithContext("Not ticking on a TileEntity!", context));
                 builder.named(NamedCause.notifier(tickingTile));
             }
+
+            @Override
+            public void associateBlockEventNotifier(PhaseContext context, CauseTracker causeTracker, BlockPos pos, IMixinBlockEventData blockEvent) {
+                final TileEntity tickingTile = context.firstNamed(NamedCause.SOURCE, TileEntity.class)
+                        .orElseThrow(PhaseUtil.throwWithContext("Expected to be ticking a block, but found none!", context));
+                blockEvent.setCurrentTickTileEntity(tickingTile);
+                context.firstNamed(NamedCause.NOTIFIER, User.class).ifPresent(blockEvent::setSourceUser);
+                TrackingUtil.trackTargetBlockFromSource(causeTracker, tickingTile, ((net.minecraft.tileentity.TileEntity) tickingTile).getPos(),
+                        blockEvent.getEventBlock(), blockEvent.getEventBlockPosition(), PlayerTracker.Type.NOTIFIER);
+            }
         },
         BLOCK() {
             @Override
@@ -441,6 +450,22 @@ public final class WorldPhase extends TrackingPhase {
                         .orElseThrow(PhaseUtil.throwWithContext("Not ticking on a Block!", context));
                 builder.named(NamedCause.notifier(tickingBlock));
             }
+
+            @Override
+            public void associateBlockEventNotifier(PhaseContext context, CauseTracker causeTracker, BlockPos pos, IMixinBlockEventData blockEvent) {
+                final BlockSnapshot tickingBlock = context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class)
+                        .orElseThrow(PhaseUtil.throwWithContext("Expected to be ticking a block, but found none!", context));
+                blockEvent.setCurrentTickBlock(tickingBlock);
+                context.firstNamed(NamedCause.NOTIFIER, User.class).ifPresent(blockEvent::setSourceUser);
+                TrackingUtil.trackTargetBlockFromSource(causeTracker, tickingBlock, ((SpongeBlockSnapshot) tickingBlock).getBlockPos(), blockEvent.getEventBlock(),
+                        blockEvent.getEventBlockPosition(), PlayerTracker.Type.NOTIFIER);
+            }
+        },
+        BLOCK_EVENT() {
+            @Override
+            public void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder, CauseTracker causeTracker) {
+
+            }
         },
         RANDOM_BLOCK() {
             @Override
@@ -486,6 +511,16 @@ public final class WorldPhase extends TrackingPhase {
                 final BlockSnapshot tickingBlock = context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class)
                         .orElseThrow(PhaseUtil.throwWithContext("Not ticking on a Block!", context));
                 builder.named(NamedCause.notifier(tickingBlock));
+            }
+
+            @Override
+            public void associateBlockEventNotifier(PhaseContext context, CauseTracker causeTracker, BlockPos pos, IMixinBlockEventData blockEvent) {
+                final BlockSnapshot tickingBlock = context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class)
+                                .orElseThrow(PhaseUtil.throwWithContext("Expected to be ticking a block, but found none!", context));
+                blockEvent.setCurrentTickBlock(tickingBlock);
+                context.firstNamed(NamedCause.NOTIFIER, User.class).ifPresent(blockEvent::setSourceUser);
+                TrackingUtil.trackTargetBlockFromSource(causeTracker, tickingBlock, ((SpongeBlockSnapshot) tickingBlock).getBlockPos(), blockEvent.getEventBlock(),
+                        blockEvent.getEventBlockPosition(), PlayerTracker.Type.NOTIFIER);
             }
         },
         PLAYER() {
@@ -551,6 +586,13 @@ public final class WorldPhase extends TrackingPhase {
 
         public abstract void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder, CauseTracker causeTracker);
 
+        public void appendNotifier(ITickable tile, PhaseContext phaseContext) {
+
+        }
+
+        public void associateBlockEventNotifier(PhaseContext context, CauseTracker causeTracker, BlockPos pos, IMixinBlockEventData blockEvent) {
+
+        }
     }
 
     @Override
@@ -631,9 +673,21 @@ public final class WorldPhase extends TrackingPhase {
     }
 
     @Override
+    public boolean ignoresBlockEvent(IPhaseState phaseState) {
+        return phaseState instanceof State;
+    }
+
+    @Override
     public void associateAdditionalCauses(IPhaseState state, PhaseContext context, Cause.Builder builder, CauseTracker causeTracker) {
         if (state instanceof Tick) {
             ((Tick) state).associateAdditionalBlockChangeCauses(context, builder, causeTracker);
+        }
+    }
+
+    @Override
+    public void associateNotifier(IPhaseState phaseState, PhaseContext context, CauseTracker causeTracker, BlockPos pos, IMixinBlockEventData blockEvent) {
+        if (phaseState instanceof Tick) {
+            ((Tick) phaseState).associateBlockEventNotifier(context, causeTracker, pos, blockEvent);
         }
     }
 

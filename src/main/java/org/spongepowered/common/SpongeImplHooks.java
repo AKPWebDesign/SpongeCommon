@@ -36,10 +36,8 @@ import net.minecraft.entity.monster.EntitySlime;
 import net.minecraft.entity.passive.EntityAmbientCreature;
 import net.minecraft.entity.passive.EntityWaterMob;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import org.spongepowered.api.entity.Transform;
@@ -55,7 +53,6 @@ import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.world.World;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.Optional;
 
 /**
@@ -103,32 +100,6 @@ public final class SpongeImplHooks {
             return ((ITileEntityProvider)block).createNewTileEntity(world, block.getMetaFromState(state));
         }
         return null;
-    }
-
-    // TODO - Determine if this is still needed
-    @SuppressWarnings("unchecked")
-    public static void updateComparatorOutputLevel(net.minecraft.world.World world, BlockPos pos, Block blockIn) {
-        Iterator<EnumFacing> iterator = EnumFacing.Plane.HORIZONTAL.iterator();
-
-        while (iterator.hasNext()) {
-            EnumFacing enumfacing = iterator.next();
-            BlockPos neighborPosition = pos.offset(enumfacing);
-
-            if (world.isBlockLoaded(neighborPosition)) {
-                IBlockState iblockstate = world.getBlockState(neighborPosition);
-
-                if (Blocks.UNPOWERED_COMPARATOR.isAssociatedBlock(iblockstate.getBlock())) {
-                    iblockstate.getBlock().onNeighborBlockChange(world, neighborPosition, iblockstate, blockIn);
-                } else if (iblockstate.getBlock().isNormalCube(iblockstate)) {
-                    neighborPosition = neighborPosition.offset(enumfacing);
-                    iblockstate = world.getBlockState(neighborPosition);
-
-                    if (Blocks.UNPOWERED_COMPARATOR.isAssociatedBlock(iblockstate.getBlock())) {
-                        iblockstate.getBlock().onNeighborBlockChange(world, neighborPosition, iblockstate, blockIn);
-                    }
-                }
-            }
-        }
     }
 
     public static void addItemStackToListForSpawning(Collection<org.spongepowered.api.item.inventory.ItemStack> itemStacks, org.spongepowered.api.item.inventory.ItemStack itemStack) {
