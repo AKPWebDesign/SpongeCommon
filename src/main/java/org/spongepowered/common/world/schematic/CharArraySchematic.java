@@ -27,6 +27,7 @@ package org.spongepowered.common.world.schematic;
 import com.flowpowered.math.vector.Vector3i;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
+import org.spongepowered.api.world.schematic.Palette;
 import org.spongepowered.api.world.schematic.Schematic;
 
 public class CharArraySchematic extends CharArraySchematicVolume implements Schematic {

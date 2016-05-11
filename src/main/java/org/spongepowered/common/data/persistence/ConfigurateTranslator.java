@@ -44,7 +44,7 @@ import java.util.Optional;
  * A translator for translating {@link DataView}s into {@link ConfigurationNode}
  * s.
  */
-final class ConfigurateTranslator implements DataTranslator<ConfigurationNode> {
+public class ConfigurateTranslator implements DataTranslator<ConfigurationNode> {
 
     private static final ConfigurateTranslator instance = new ConfigurateTranslator();
     private static final TypeToken<ConfigurationNode> TOKEN = TypeToken.of(ConfigurationNode.class);

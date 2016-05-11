@@ -28,6 +28,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.world.schematic.Palette;
 
 import java.util.Optional;
 
@@ -42,7 +43,7 @@ public class GlobalPalette implements Palette {
     }
 
     @Override
-    public int getLength() {
+    public int getHighestId() {
         return this.length;
     }
 

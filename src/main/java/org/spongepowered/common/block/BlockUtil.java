@@ -78,11 +78,14 @@ public final class BlockUtil {
         }
     }
 
-    public static BlockState fromNative(IBlockState state) {
-        if (state instanceof BlockState) {
-            return (BlockState) state;
+    public static BlockState fromNative(IBlockState blockState) {
+        if (blockState instanceof BlockState) {
+            return (BlockState) blockState;
+        } else {
+            // TODO: Need to figure out what is sensible for other BlockState
+            // implementing classes.
+            throw new UnsupportedOperationException("Custom BlockState implementations are not supported");
         }
-        throw new IllegalArgumentException("Native block state implementation not compatible with this implementation!");
     }
 
     public static BlockType toBlock(IBlockState state) {
@@ -94,16 +97,6 @@ public final class BlockUtil {
     }
 
     private BlockUtil() {
-    }
-
-    public static BlockState fromNative(IBlockState blockState) {
-        if (blockState instanceof BlockState) {
-            return (BlockState) blockState;
-        } else {
-            // TODO: Need to figure out what is sensible for other BlockState
-            // implementing classes.
-            throw new UnsupportedOperationException("Custom BlockState implementations are not supported");
-        }
     }
 
     private static final class BlockStateComparator implements Comparator<BlockState> {
