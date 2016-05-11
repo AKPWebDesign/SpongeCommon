@@ -38,7 +38,6 @@ import org.spongepowered.api.data.persistence.InvalidDataException;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * A translator for translating {@link DataView}s into {@link ConfigurationNode}
@@ -114,10 +113,10 @@ public class ConfigurateTranslator implements DataTranslator<ConfigurationNode> 
     }
 
     @Override
-    public Optional<ConfigurationNode> translate(DataView view) throws InvalidDataException {
+    public ConfigurationNode translate(DataView view) throws InvalidDataException {
         final SimpleConfigurationNode node = SimpleConfigurationNode.root();
         populateNode(node, view);
-        return  Optional.of(node);
+        return node;
     }
 
     @Override

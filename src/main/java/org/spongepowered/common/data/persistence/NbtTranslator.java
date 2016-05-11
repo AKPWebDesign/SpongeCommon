@@ -55,8 +55,6 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 
 public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
 
@@ -304,8 +302,8 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
     }
 
     @Override
-    public Optional<NBTTagCompound> translate(DataView view) throws InvalidDataException {
-        return Optional.of(containerToCompound(view));
+    public NBTTagCompound translate(DataView view) throws InvalidDataException {
+        return containerToCompound(view);
     }
 
     @Override
