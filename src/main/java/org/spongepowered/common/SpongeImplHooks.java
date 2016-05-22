@@ -43,6 +43,7 @@ import net.minecraft.network.play.client.C0EPacketClickWindow;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.Teleporter;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
@@ -156,5 +157,9 @@ public final class SpongeImplHooks {
             player.worldObj.spawnEntityInWorld(ret);
             return ret;
         }
+    }
+
+    public static void registerPortalAgentType(Teleporter teleporter) {
+        // plugins are required to register types
     }
 }
