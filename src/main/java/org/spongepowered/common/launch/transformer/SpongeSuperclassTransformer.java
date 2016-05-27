@@ -44,6 +44,7 @@ public class SpongeSuperclassTransformer implements IClassTransformer {
         String superclass = SpongeSuperclassRegistry.getSuperclass(name);
         if (superclass != null) {
             ClassNode node = this.readClass(basicClass);
+            this.sanityCheck(node);
 
             node.methods.stream().forEach(m -> this.transformMethod(m, name, node.superName, superclass));
             node.superName = superclass;
@@ -80,5 +81,11 @@ public class SpongeSuperclassTransformer implements IClassTransformer {
         ClassNode classNode = new ClassNode();
         classReader.accept(classNode, 0);
         return classNode;
+    }
+
+    private void sanityCheck(ClassNode node) {
+        if (!(node.superName.equals("java/lang/Object"))) {
+            throw new IllegalStateException(String.format("Cannot transform class %s! It has a superclass of %s, instead of Object!", node.name, node.superName));
+        }
     }
 }

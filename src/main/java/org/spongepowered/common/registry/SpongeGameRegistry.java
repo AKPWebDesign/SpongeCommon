@@ -72,6 +72,7 @@ import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.persistence.DataSerializers;
 import org.spongepowered.common.data.property.SpongePropertyRegistry;
 import org.spongepowered.common.data.value.SpongeValueFactory;
+import org.spongepowered.common.launch.transformer.SpongeSuperclassRegistry;
 import org.spongepowered.common.network.status.SpongeFavicon;
 import org.spongepowered.common.registry.type.block.RotationRegistryModule;
 import org.spongepowered.common.registry.type.entity.AITaskTypeModule;
@@ -256,7 +257,7 @@ public class SpongeGameRegistry implements GameRegistry {
             return builder.build();
         }
     }
-    
+
     @SuppressWarnings("unchecked")
     @Override
     public <T extends ResettableBuilder<?, ? super T>> T createBuilder(Class<T> builderClass) {
@@ -301,8 +302,12 @@ public class SpongeGameRegistry implements GameRegistry {
 
     @Override
     public AITaskType registerAITaskType(Object plugin, String id, String name, Class<? extends AbstractAITask<? extends Agent>> aiClass) {
-
         return AITaskTypeModule.getInstance().createAITaskType(plugin, id, name, aiClass);
+    }
+
+    @Override
+    public void registerTeleporter(String teleporterClassName) {
+        SpongeSuperclassRegistry.registerSuperclassModification(teleporterClassName, "net.minecraft.world.Teleporter");
     }
 
     @Override
